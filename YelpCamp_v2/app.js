@@ -12,14 +12,16 @@ app.set('view engine', 'ejs');
 
 var campgroundSchema = new mongoose.Schema({
     name: String,
-    image: String
+    image: String,
+    description: String
 });
 
 var Campground = mongoose.model("Campground", campgroundSchema);
 
 // Campground.create({
-//     name: 'Granite Hill',
-//     image: 'https://farm9.staticflickr.com/8358/8444469474_8f4b935818.jpg'
+//     name: "Granate Hill",
+//     image: "https://farm2.staticflickr.com/1086/882244782_d067df2717.jpg",
+//     description: "This is a huge granate hill, no bathrooms and no water."
 // }, function(err, campground) {
 //     if (err) {
 //         console.log(err);
@@ -29,36 +31,29 @@ var Campground = mongoose.model("Campground", campgroundSchema);
 //     }
 // });
 
-
-// var campgrounds = [
-//     { name: 'Salmon Creak', image: 'https://farm4.staticflickr.com/3053/2586934044_339a678e73.jpg' },
-//     { name: 'Granite Hill', image: 'https://farm9.staticflickr.com/8358/8444469474_8f4b935818.jpg' },
-//     { name: 'Mountain Goat\'s Rest', image: 'https://farm4.staticflickr.com/3924/14422533026_9be7d49684.jpg' },
-//     { name: 'Salmon Creak', image: 'https://farm1.staticflickr.com/82/225912054_690e32830d.jpg' },
-//     { name: 'Granite Hill', image: 'https://farm9.staticflickr.com/8041/7930230882_0bb80ca452.jpg' },
-//     { name: 'Mountain Goat\'s Rest', image: 'https://farm7.staticflickr.com/6138/5952610874_5bf8a80e15.jpg' }
-// ];
-
 app.get('/', function(req, res) {
     res.render('landing')
 });
 
+// INDEX - Display a list of campgrounds
 app.get('/campgrounds', function(req, res) {
     // Get all campgrounds from DB
     Campground.find({}, function(err, allCampgrounds) {
         if (err) {
             console.log(err);
         } else {
-            res.render('campgrounds', { campgrounds: allCampgrounds });
+            res.render('index', { campgrounds: allCampgrounds });
         }
     });
 });
 
+// CREATE - Adds a new campground
 app.post('/campgrounds', function(req, res) {
     // get data from form and add to campgrounds array
     var name = req.body.name;
     var image = req.body.image;
-    var newCampground = { name: name, image: image };
+    var description = req.body.description;
+    var newCampground = { name: name, image: image, description: description };
     // Create a new campground and save to DB
     Campground.create(newCampground, function(err, newlyCreated) {
         if (err) {
@@ -68,11 +63,24 @@ app.post('/campgrounds', function(req, res) {
             res.redirect('/campgrounds');
         }
     })
-
 });
 
+// NEW - Displays a form to make new campgrounds
 app.get('/campgrounds/new', function(req, res) {
     res.render('new');
+});
+
+// SHOW - shows more info about one campground
+app.get('/campgrounds/:id', function(req, res) {
+    // find the campground with provided ID
+    Campground.findById(req.params.id, function(err, foundCampground) {
+        if (err) {
+            console.log(err);
+        } else {
+            // render show template with that campground
+            res.render('show', { campground: foundCampground });
+        }
+    });
 });
 
 
